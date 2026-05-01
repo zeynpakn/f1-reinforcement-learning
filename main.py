@@ -3,6 +3,7 @@ import sys
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from car import Car
 from track import Track
+from sensor import SensorSystem
 
 def main():
     pygame.init()
@@ -13,6 +14,8 @@ def main():
 
     track = Track()
     car   = Car(track.start_x, track.start_y, track.start_angle)
+    # sensor.py'deki SensorSystem'i kullanarak sensörleri başlat
+    sensors = SensorSystem()
 
     next_checkpoint = 0
     total_reward    = 0
@@ -39,6 +42,8 @@ def main():
 
         # ── Güncelle ────────────────────────────────────
         car.update()
+        # sensor.py'deki SensorSystem'i kullanarak sensörleri güncelle
+        sensors.update(car.x, car.y, car.angle, track)
 
         # ── Çarpışma kontrolü ───────────────────────────
         corners = car.get_corners()
@@ -62,6 +67,8 @@ def main():
         # ── Çizim ───────────────────────────────────────
         track.draw(screen)
         car.draw(screen)
+        # sensor.py'deki SensorSystem'i kullanarak sensörleri çiz
+        sensors.draw(screen, car.x, car.y)
 
         # ── HUD ─────────────────────────────────────────
         hud_lines = [
@@ -71,6 +78,7 @@ def main():
             f"Tur: {laps}",
             f"Reward: {total_reward}",
             f"[R] Reset  [↑↓←→] Hareket",
+            f"Sensörler: {[f'{r:.0f}' for r in sensors.readings]}",
         ]
         for i, line in enumerate(hud_lines):
             surf = font.render(line, True, (255, 255, 255))
