@@ -1,27 +1,20 @@
 from environment import Environment
-import random
+from q_learning_agent import QLearningAgent
 
-env    = Environment(headless=True)
-ACTION_COUNT = 5
+env   = Environment(headless=True)
+agent = QLearningAgent()
 
-episode_rewards = []
+state = env.reset()
 
-for episode in range(100):
-    state      = env.reset()
-    total_rew  = 0
-    done       = False
+for _ in range(10):
+    action                    = agent.choose_action(state)
+    next_state, reward, done, info = env.step(action)
+    agent.update(state, action, reward, next_state, done)
+    state = next_state
+    print(f"Aksiyon: {action} | Reward: {reward:6.1f} | Epsilon: {agent.epsilon:.3f} | Q-table boyutu: {len(agent.q_table)}")
+    if done:
+        state = env.reset()
 
-    while not done:
-        action              = random.randint(0, ACTION_COUNT - 1)
-        state, reward, done, info = env.step(action)
-        total_rew          += reward
-
-    episode_rewards.append(total_rew)
-    if (episode + 1) % 10 == 0:
-        avg = sum(episode_rewards[-10:]) / 10
-        print(f"Episode {episode+1:3d} | Son 10 ort. reward: {avg:.1f}")
-
-print(f"\nBaseline özeti:")
-print(f"  Ortalama reward : {sum(episode_rewards)/len(episode_rewards):.1f}")
-print(f"  En iyi episode  : {max(episode_rewards):.1f}")
-print(f"  En kötü episode : {min(episode_rewards):.1f}")
+agent.decay_epsilon()
+print(f"\nEpsilon decay sonrası: {agent.epsilon:.4f}")
+agent.save()
