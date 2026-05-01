@@ -210,3 +210,7 @@ python test_env.py
 
 Made with ❤️ by [Zeynep Akın](https://github.com/zeynpakn) & [Merve Özdoğru](https://github.com/ozdogrumerve) & [Hatice Kübra Ülke](https://github.com/hkubrau)
 </div>
+
+<div align="center">
+Built with 🧠 Q-Learning · 💥 Countless crashes · ☕ Probably too much coffee
+</div>
