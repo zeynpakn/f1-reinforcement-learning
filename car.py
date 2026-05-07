@@ -6,6 +6,7 @@ import math
 
 class Car:
     def __init__(self, x, y, angle=0):
+        # Parametreler başlatılıyor
         self.x = float(x)
         self.y = float(y)
         self.angle = float(angle)  # 0 = Sağa bakıyor (Derece)
@@ -25,18 +26,22 @@ class Car:
         self.COLOR_ACCENT = (255, 255, 255) # Detay çizgileri
 
     def accelerate(self):
+        # İlgili değerler config'den çekilip hız güncelleniyor, hızlanma fonksiyonu 
         from config import CAR_ACCELERATION, CAR_SPEED_MAX
         self.speed = min(self.speed + CAR_ACCELERATION, CAR_SPEED_MAX)
 
     def brake(self):
+        # İlgili değerler config'den çekilip hız güncelleniyor, fren fonksiyonu
         from config import CAR_ACCELERATION, CAR_SPEED_MAX
         self.speed = max(self.speed - CAR_ACCELERATION, -CAR_SPEED_MAX / 2)
 
     def turn_left(self):
+        # Sola dönüş, açı güncelle 
         from config import CAR_TURN_SPEED
         self.angle -= CAR_TURN_SPEED
 
     def turn_right(self):
+        # Sağa dönüş, açı güncelle
         from config import CAR_TURN_SPEED
         self.angle += CAR_TURN_SPEED
 
@@ -49,11 +54,13 @@ class Car:
             self.speed = min(self.speed + CAR_FRICTION, 0)
 
         # Pozisyon güncelleme
-        rad = math.radians(self.angle)
+        rad = math.radians(self.angle) # derece radyan dönüşümü
+        # Koordinat güncelleme 
         self.x += math.cos(rad) * self.speed
         self.y += math.sin(rad) * self.speed
 
     def reset(self, x, y, angle=0):
+        # Araba çarpınca vs konumu başa al
         self.x = float(x)
         self.y = float(y)
         self.angle = float(angle)
@@ -62,6 +69,7 @@ class Car:
 
     def _get_rotated_point(self, local_x, local_y):
         """Lokal (merkez 0,0) koordinatı dünya koordinatına çevirir."""
+        # Arabanın üzerindeki bir parçanın, araba döndükten sonra ekranda nerede duracağını hesaplama
         rad = math.radians(self.angle)
         cos_a, sin_a = math.cos(rad), math.sin(rad)
         rx = self.x + (local_x * cos_a - local_y * sin_a)
@@ -80,13 +88,15 @@ class Car:
         ]
 
     def _draw_rotated_poly(self, screen, color, points, outline=True):
-        """Lokal noktaları döndürüp ekrana çizer."""
-        world_points = [self._get_rotated_point(p[0], p[1]) for p in points]
-        pygame.draw.polygon(screen, color, world_points)
+        """Arabanın parçalarını çizmek için kullanılan yardımcı fonksiyon."""
+        world_points = [self._get_rotated_point(p[0], p[1]) for p in points] # lokal noktalar gerçek ekran koordinatlarına çevriliyor
+        pygame.draw.polygon(screen, color, world_points) # sonra ekrana çiziliyor
         if outline:
             pygame.draw.polygon(screen, self.COLOR_OUTLINE, world_points, 2)
 
     def draw(self, screen):
+        """Araba çizim fonksiyonu."""
+        # Araba aktif değilse çizim yapılmaz
         if not self.alive:
             return
 
