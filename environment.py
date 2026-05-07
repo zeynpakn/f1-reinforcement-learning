@@ -14,26 +14,28 @@ class Environment:
     def __init__(self, headless=HEADLESS):
         self.headless = headless
 
-        pygame.init()
+        pygame.init() # Pygame sistemlerini başlatıyor
         if self.headless:
             import os
             os.environ["SDL_VIDEODRIVER"] = "dummy"
-            self.screen = pygame.display.set_mode((1, 1))
-        else:
+            self.screen = pygame.display.set_mode((1, 1)) # Gerçek pencere yerine minicikk sahte ekran
+        else: # Normal modda isek gerçek pencere aç ekranı çiz
             self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
             pygame.display.set_caption("F1 RL - Training")
 
-        self.clock   = pygame.time.Clock()
-        self.track   = Track()
+        self.clock   = pygame.time.Clock() # Fps kontrolü için
+        self.track   = Track() # Pygame'in track sınıfından bir nesne oluştur (pist için)
+
+        # Araba oluştur
         self.car     = Car(self.track.start_x,
                            self.track.start_y,
                            self.track.start_angle)
-        self.sensors = SensorSystem()
+        self.sensors = SensorSystem() 
 
         self.next_checkpoint = 0
         self.steps           = 0
         self.total_reward    = 0
-        self.lap_count       = 0
+        self.lap_count       = 0 # tamamlanan tur sayısı
 
     # ── Sıfırla ────────────────────────────────────────
     def reset(self):
@@ -55,7 +57,7 @@ class Environment:
                             self.car.angle, self.track)
         self.steps += 1
 
-        reward, done = self._calculate_reward()
+        reward, done = self._calculate_reward() # ödül hesapla episode bitti mi kontrol et
         self.total_reward += reward
         state = self._get_state()
 
@@ -118,21 +120,24 @@ class Environment:
 
     # ── State ──────────────────────────────────────────
     def _get_state(self):
+        """Agent'ın gördüğü yeni dünya"""
+        # Sensör ve hız normalize edilir
         normalized = self.sensors.get_normalized()
         speed_norm = self.car.speed / 6.0
         return tuple(normalized) + (speed_norm,)
 
     # ── Render ─────────────────────────────────────────
-    def render(self):
+    def render(self): # Ekran çizimi
         if self.headless:
             return
-        for event in pygame.event.get():
+        for event in pygame.event.get(): # Pencere kapanma olaylarını dinliyor 
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
 
+        # Bileşenleri çizer 
         self.track.draw(self.screen)
         self.car.draw(self.screen)
         self.sensors.draw(self.screen, self.car.x, self.car.y)
-        pygame.display.flip()
-        self.clock.tick(FPS)
+        pygame.display.flip() 
+        self.clock.tick(FPS) # FPS'i sabit tutar
